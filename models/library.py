@@ -1,5 +1,3 @@
-# library.py
-
 import datetime as dt
 from uuid import UUID
 import random
@@ -26,8 +24,9 @@ class Library:
         # statistikai
         self.borrowed_genre_counts = {}
 
-    # ----- Registracija / auth -----
 
+
+    # ----- Registracija / auth -----
     def add_librarian(self, user_name, password):
         user_name = user_name.strip()
         password = password.strip()
@@ -78,7 +77,9 @@ class Library:
             return reader
         return None
 
-           
+
+
+    # ----- Library services -----
     def add_book(self, name, author, year, genre, copies=1):
         name = name.strip()
         author = author.strip()
@@ -101,14 +102,6 @@ class Library:
 
     def list_all_books(self):
         return list(self.books.values())
-    
-
-    def list_available_books(self):
-        available = []
-        for book_id, book in self.books.items():
-            if book_id not in self.loans:
-                available.append(book)
-        return available
     
 
     def search_books(self, text):
@@ -142,6 +135,14 @@ class Library:
             return 0
         borrowed = self.borrowed_copies_count(book_id)
         return book.copies - borrowed
+    
+
+    def list_available_books(self):
+        available = []
+        for book_id, book in self.books.items():
+            if self.available_copies(book_id) > 0:
+                available.append(book)
+        return available
 
 
     def delete_old_books(self, oldest_possible_year):
@@ -161,7 +162,7 @@ class Library:
         if now is None:
             now = dt.datetime.now()
 
-        for loan in self.loans:  # loans is a list
+        for loan in self.loans:
             if loan.reader_card_id == reader_card_id and loan.return_date < now:
                 return True
 
@@ -175,8 +176,86 @@ class Library:
             if loan.return_date < now:
                 overdue.append(loan)
         return overdue
+
+
+    def overdue_count_for_reader_meniu(self, reader_card_id, now=None):
+        if now is None:
+            now = dt.datetime.now()
+
+        count = 0
+        for loan in self.loans:
+            if loan.reader_card_id == reader_card_id and loan.return_date < now:
+                count += 1
+        return count
+
+
+    def find_loan(self, reader_card_id, book_id):
+        for loan in self.loans:
+            if loan.reader_card_id == reader_card_id and loan.book_id == book_id:
+                return loan
+        return None
+
+
+    def lend_book(self, reader_card_id, book_id, days=14, max_books=3):
+        if reader_card_id not in self.readers:
+            raise ValueError("Nerastas skaitytojas su tokiu kortelės numeriu.")
+        if book_id not in self.books:
+            raise ValueError("Nerasta tokia knyga.")
+        if days <= 0:
+            raise ValueError("Dienų skaičius turi būti teigiamas.")
+
+        reader = self.readers[reader_card_id]
+
+        if len(reader.taken_book_ids) >= max_books:
+            raise ValueError("Pasiektas knygų limitas.")
+
+        if self.reader_has_overdue(reader_card_id):
+            raise ValueError("Negalima pasiimti knygos: turite vėluojančią knygą!")
+
+        if self.available_copies(book_id) <= 0:
+            raise ValueError("Šiuo metu nėra laisvų šios knygos kopijų.")
+
+        borrow_date = dt.datetime.now()
+        return_date = borrow_date + dt.timedelta(days=days)
+
+        new_loan = Loan(book_id, reader_card_id, borrow_date, return_date)
+        self.loans.append(new_loan)
+
+        reader.taken_book_ids.append(book_id)
+
+        # update stats
+        genre = self.books[book_id].genre
+        if genre in self.borrowed_genre_counts:
+            self.borrowed_genre_counts[genre] += 1
+        else:
+            self.borrowed_genre_counts[genre] = 1
+
+        return new_loan
+
+
+    def return_book(self, reader_card_id, book_id):
+        if reader_card_id not in self.readers:
+            raise ValueError("Nerastas skaitytojas su tokiu kortelės numeriu.")
+
+        loan_index = None
+        for i, loan in enumerate(self.loans):
+            if loan.reader_card_id == reader_card_id and loan.book_id == book_id:
+                loan_index = i
+                break
+
+        if loan_index is None:
+            raise ValueError("Šis skaitytojas nėra paėmęs šios knygos.")
+
+        del self.loans[loan_index]
+
+        reader = self.readers[reader_card_id]
+        if book_id in reader.taken_book_ids:
+            reader.taken_book_ids.remove(book_id)
+
     
 
+
+    # ----- Library statistics -----
     def statistics(self, now=None):
         if now is None:
             now = dt.datetime.now()

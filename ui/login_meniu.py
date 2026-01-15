@@ -1,5 +1,3 @@
-# login_meniu.py
-
 from utils.helper_functions import _ask_choice, _input_text
 
 

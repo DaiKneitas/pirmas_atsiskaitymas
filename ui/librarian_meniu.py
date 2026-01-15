@@ -1,12 +1,13 @@
-# librarian_meniu.py
-
 from utils.helper_functions import _input_text, _ask_choice, _ask_int
 from starter_books.starter_books import starter_books
 
 def librarian_meniu(library, librarian, save):
     while True:
-        selection = _ask_choice("""
+        selection = _ask_choice(f"""
 Bibliotekos valdymas
+Prisijungęs bibliotekininkas: {librarian.user_name}
+Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis: {len(library.loans)}
+
 Įveskite skaičių esantį prie vieno iš šių galimų veiksmų:
 
 1) Pridėti naują knygą į biblioteką

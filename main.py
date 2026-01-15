@@ -1,5 +1,3 @@
-# main.py
-
 from models.library import Library
 from services.storage import load_file, save_file
 from ui.login_meniu import login_meniu
