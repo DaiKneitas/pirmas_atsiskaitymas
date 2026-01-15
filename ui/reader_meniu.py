@@ -1,6 +1,8 @@
+# reader_meniu.py
+
 from utils.helper_functions import _input_text, _ask_choice
 
-def reader_meniu(library, reader):
+def reader_meniu(library, reader, save):
     while True:
         selection = _ask_choice("""
 Sveiki prisijungę prie bibliotekos!
@@ -31,4 +33,4 @@ Sveiki prisijungę prie bibliotekos!
             pass
 
         elif selection == "9":
-            return None
+            return

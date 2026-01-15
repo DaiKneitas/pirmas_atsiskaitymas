@@ -1,3 +1,5 @@
+# main.py
+
 from models.library import Library
 from services.storage import load_file, save_file
 from ui.login_meniu import login_meniu
@@ -8,21 +10,35 @@ import os
 
 
 def main():
-	os.makedirs("data", exist_ok=True)
+    os.makedirs("data", exist_ok=True)
 
-	library = load_file(DATA_FILE)
-	if library is None:
-		library = Library()
+    library = load_file(DATA_FILE)
+    if library is None:
+        library = Library()
 
-	if not library.librarians:
-		library.add_librarian(DEFAULT_LIBRARIAN_USERNAME, DEFAULT_LIBRARIAN_PASSWORD)
-		save_file(DATA_FILE, library)
+    def save():
+        save_file(DATA_FILE, library)
 
-	login_meniu(library)
+    if not library.librarians:
+        library.add_librarian(DEFAULT_LIBRARIAN_USERNAME, DEFAULT_LIBRARIAN_PASSWORD)
+        save()
 
-	print(library.librarians)
-	print(library.readers)
+    while True:
+        session = login_meniu(library, save)
+
+        if session is None:
+            save()
+            print("Programa uždaroma")
+            break
+
+        role, user_obj = session
+
+        if role == "librarian":
+            librarian_meniu(library, user_obj, save)
+
+        elif role == "reader":
+            reader_meniu(library, user_obj, save)
 
 
-
-main()
+if __name__ == "__main__":
+    main()
