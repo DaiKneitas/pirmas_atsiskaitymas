@@ -22,6 +22,8 @@ Registracija naujiems programos vartotojams
 9) Išeiti
 """, {"1","2","3","4","9"})
 
+
+        # Bibliotekininko prisijungimas
         if selection == "1":
             print("--- Bibliotekininko prisijungimas ---")
             user_name = _input_text("Įveskite savo prisijungimo vardą: ")
@@ -30,8 +32,10 @@ Registracija naujiems programos vartotojams
             librarian = library.authenticate_librarian(user_name, password)
             if librarian:
                 return ("librarian", librarian)
-            print("Neteisingi prisijungimo duomenys.")
+            print("xxx --- Neteisingai suvesti prisijungimo duomenys! --- xxx")
 
+
+        # Skaitytojo prisijungimas
         elif selection == "2":
             print("--- Skaitytojo prisijungimas ---")
             card_id = _input_text("Įveskite savo kortelės numerį: ")
@@ -40,8 +44,10 @@ Registracija naujiems programos vartotojams
             reader = library.authenticate_reader(card_id, password)
             if reader:
                 return ("reader", reader)
-            print("Neteisingi prisijungimo duomenys.")
+            print("xxx --- Neteisingai suvesti prisijungimo duomenys! --- xxx")
 
+
+        # Bibliotekininko paskyros sukūrimas
         elif selection == "3":
             print("--- Bibliotekininko registracija ---")
             user_name = _input_text("Įveskite norimą prisijungimo vardą: ")
@@ -53,6 +59,8 @@ Registracija naujiems programos vartotojams
             except Exception as e:
                 print(f"Klaida: {e}")
 
+
+        # Skaitytojo paskyros sukūrimas
         elif selection == "4":
             print("--- Skaitytojo registracija ---")
             name = _input_text("Įveskite savo vardą: ")
@@ -63,7 +71,7 @@ Registracija naujiems programos vartotojams
                 save()
                 print(f"Skaitytojas sukurtas! Jūsų kortelės numeris: {reader.reader_card_id}")
                 
-                # optionally auto-login:
+                # auto-login sukūrus skaitytoją
                 return ("reader", reader)
             except Exception as e:
                 print(f"Klaida: {e}")

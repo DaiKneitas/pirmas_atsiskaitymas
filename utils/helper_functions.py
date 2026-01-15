@@ -14,19 +14,18 @@ def _ask_choice(prompt, allowed):
         user_input = input(prompt).strip()
         if user_input in allowed:
             return user_input
-        print("Neteisinga įvestis.")
+        print("xxxxx --- NETEISINGA ĮVESTIS --- xxxxx")
 
 
-# Pagalbine funkcija, kur patikrina, kad būtų įvestas sveikas skaičius
-def _ask_int(text_for_user, min_value=None, max_value=None):
+# Pagalbine funkcija, kur patikrina, kad būtų įvestas sveikas skaičius, arba skaičius tam tikrose ribose nuo/iki
+def _ask_int(prompt, min_value=None, max_value=None):
     while True:
-        user_input = input(text_for_user)
-
-        if user_input.isdigit() == False:
-            print("Įveskite sveiką skaičių (pvz: 10).")
+        s = input(prompt).strip()
+        try:
+            number = int(s)
+        except ValueError:
+            print("Įveskite sveiką skaičių.")
             continue
-
-        number = int(user_input)
 
         if min_value is not None and number < min_value:
             print(f"Skaičius per mažas. Turi būti bent {min_value}.")
@@ -37,3 +36,4 @@ def _ask_int(text_for_user, min_value=None, max_value=None):
             continue
 
         return number
+

@@ -10,34 +10,36 @@ import os
 
 
 def main():
-    os.makedirs("data", exist_ok=True)
 
-    library = load_file(DATA_FILE)
-    if library is None:
-        library = Library()
+	os.makedirs("data", exist_ok=True)
 
-    def save():
-        save_file(DATA_FILE, library)
+	library = load_file(DATA_FILE)
+	if library is None:
+		library = Library()
 
-    if not library.librarians:
-        library.add_librarian(DEFAULT_LIBRARIAN_USERNAME, DEFAULT_LIBRARIAN_PASSWORD)
-        save()
+	def save():
+		save_file(DATA_FILE, library)
 
-    while True:
-        session = login_meniu(library, save)
+	if not library.librarians:
+		library.add_librarian(DEFAULT_LIBRARIAN_USERNAME, DEFAULT_LIBRARIAN_PASSWORD)
+		save()
 
-        if session is None:
-            save()
-            print("Programa uždaroma")
-            break
+	while True:
+		session = login_meniu(library, save)
 
-        role, user_obj = session
+		if session is None:
+			save()
+			print("Programa uždaroma")
+			break
 
-        if role == "librarian":
-            librarian_meniu(library, user_obj, save)
+		role, user_obj = session
 
-        elif role == "reader":
-            reader_meniu(library, user_obj, save)
+		if role == "librarian":
+			librarian_meniu(library, user_obj, save)
+
+		elif role == "reader":
+			reader_meniu(library, user_obj, save)
+
 
 
 if __name__ == "__main__":
