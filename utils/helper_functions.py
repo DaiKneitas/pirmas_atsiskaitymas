@@ -1,3 +1,5 @@
+import os
+
 # Pagalbine funkcija vartotojo input patikrai, kad nebutu paliktas tuscias laukas
 def _input_text(text_for_user, min_length=1):
     while True:
@@ -5,7 +7,7 @@ def _input_text(text_for_user, min_length=1):
         if len(user_input) >= min_length:
             return user_input
         
-        print("❌ Laukas negali būti tuščias, įveskite reikiamą tekstą")
+        print("☠️❌ Laukas negali būti tuščias, įveskite reikiamą tekstą")
 
 
 # Pagalbine funkcija meniu patikrai, kad būtų įvestas tik leidžiamas pasirinkimas iš sarašo
@@ -24,16 +26,20 @@ def _ask_int(prompt, min_value=None, max_value=None):
         try:
             number = int(skaicius)
         except ValueError:
-            print("❌ Įveskite sveiką skaičių.")
+            print("☠️❌ Įveskite sveiką skaičių.")
             continue
 
         if min_value is not None and number < min_value:
-            print(f"❌ Skaičius per mažas. Turi būti bent {min_value}.")
+            print(f"☠️❌ Skaičius per mažas. Turi būti bent {min_value}.")
             continue
 
         if max_value is not None and number > max_value:
-            print(f"❌ Skaičius per didelis. Turi būti ne daugiau {max_value}.")
+            print(f"☠️❌ Skaičius per didelis. Turi būti ne daugiau {max_value}.")
             continue
 
         return number
+    
+# terminalo pravalymui
+def _clear_screen():
+    os.system("cls" if os.name == "nt" else "clear")
 

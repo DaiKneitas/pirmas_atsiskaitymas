@@ -1,15 +1,24 @@
-from utils.helper_functions import _ask_choice, _input_text
+# login_meniu.py
 
+from utils.helper_functions import _ask_choice, _input_text, _clear_screen
 
 def login_meniu(library, save):
+    last_message = ""
+
     while True:
+        _clear_screen()
+
+        if last_message:
+            print(last_message)
+            print()
+
         selection = _ask_choice("""
 --------------------------------------------
 Prisijungimas:
 --------------------------------------------
 1) Bibliotekininkas
 2) Skaitytojas
-                      
+
 --------------------------------------------
 Registracija naujiems programos vartotojams
 --------------------------------------------
@@ -18,11 +27,9 @@ Registracija naujiems programos vartotojams
 
 --------------------------------------------
 9) Išeiti
---------------------------------------------------------------------
+--------------------------------------------
 """, {"1","2","3","4","9"})
 
-
-        # Bibliotekininko prisijungimas
         if selection == "1":
             print("--- Bibliotekininko prisijungimas ---")
             user_name = _input_text("Įveskite savo prisijungimo vardą: ")
@@ -31,10 +38,9 @@ Registracija naujiems programos vartotojams
             librarian = library.authenticate_librarian(user_name, password)
             if librarian:
                 return ("librarian", librarian)
-            print("❌❌❌ --- Neteisingai suvesti prisijungimo duomenys! --- ❌❌❌")
 
+            last_message = "☠️❌ Neteisingai suvesti bibliotekininko prisijungimo duomenys!"
 
-        # Skaitytojo prisijungimas
         elif selection == "2":
             print("--- Skaitytojo prisijungimas ---")
             card_id = _input_text("Įveskite savo kortelės numerį: ")
@@ -43,39 +49,42 @@ Registracija naujiems programos vartotojams
             reader = library.authenticate_reader(card_id, password)
             if reader:
                 return ("reader", reader)
-            print("❌❌❌ --- Neteisingai suvesti prisijungimo duomenys! --- ❌❌❌")
 
+            last_message = "☠️❌ Neteisingai suvesti skaitytojo prisijungimo duomenys!"
 
-        # Bibliotekininko paskyros sukūrimas
         elif selection == "3":
             print("--- Bibliotekininko registracija ---")
             user_name = _input_text("Įveskite norimą prisijungimo vardą: ")
             password = _input_text("Įveskite norimą slaptažodį: ")
+
             try:
                 library.add_librarian(user_name, password)
                 save()
-                print("✅ Bibliotekininkas sukurtas. Dabar prisijunkite.")
+                last_message = "✅ Bibliotekininkas sukurtas. Dabar prisijunkite."
             except Exception as e:
-                print(f"😱☠️ Klaida: {e}")
+                last_message = f"☠️❌ Klaida: {e}"
 
-
-        # Skaitytojo paskyros sukūrimas
         elif selection == "4":
             print("--- Skaitytojo registracija ---")
             name = _input_text("Įveskite savo vardą: ")
             last_name = _input_text("Įveskite savo pavardę: ")
             password = _input_text("Įveskite norimą slaptažodį: ")
+
             try:
                 reader = library.register_reader(name, last_name, password)
                 save()
-                print(f"✅ Skaitytojas sukurtas! Jūsų kortelės numeris: {reader.reader_card_id}")
-                
-                # auto-login sukūrus skaitytoją
-                return ("reader", reader)
+
+                print(f"\n✅ Skaitytojas sukurtas! Jūsų kortelės numeris: {reader.reader_card_id}")
+                input("Spauskite Enter, kad grįžti į prisijungimo meniu...")
+
+                last_message = "✅ Registracija sėkminga. Prisijunkite su kortelės numeriu."
+                continue
+
             except Exception as e:
-                print(f"😱☠️ Klaida: {e}")
+                last_message = f"☠️❌ Klaida: {e}"
 
         elif selection == "9":
-            return
+            return None
+
 
 

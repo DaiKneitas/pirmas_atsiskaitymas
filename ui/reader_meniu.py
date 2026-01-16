@@ -1,10 +1,18 @@
 from uuid import UUID
-from utils.helper_functions import _input_text, _ask_choice, _ask_int
+from utils.helper_functions import _input_text, _ask_choice, _ask_int, _clear_screen
 
 def reader_meniu(library, reader, save):
+    last_message = ""
+
     while True:
+        _clear_screen()
+
         taken_count = len(reader.taken_book_ids)
         overdue_count = library.overdue_count_for_reader_meniu(reader.reader_card_id)
+
+        if last_message:
+            print(last_message)
+            print()
 
         selection = _ask_choice(f"""
 --------------------------------------------------------------------
@@ -23,45 +31,43 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
 9) Atsijungti
 --------------------------------------------------------------------
 """, {"1","2","3","4","5","9"})
-        
+
         if selection == "1":
             try:
                 if library.reader_has_overdue(reader.reader_card_id):
-                    print("Turite vėluojančių knygų! Pirmiausia grąžinkite jas!")
+                    last_message = "☠️❌ Turite vėluojančių knygų! Pirmiausia grąžinkite jas!"
                     continue
 
                 available_books = library.list_available_books()
                 if not available_books:
-                    print("Šiuo metu nėra laisvų knygų.")
+                    last_message = "☠️❌ Šiuo metu nėra laisvų knygų."
                     continue
 
                 print("Laisvos knygos:")
                 for b in available_books:
                     available = library.available_copies(b.id)
-                    print(f"{b.name} — {b.author} ({b.year}) | laisva {available}/{b.copies} | id={b.id}\n")
+                    print(f"{b.name} — {b.author} ({b.year}) | laisva {available}/{b.copies} | id={b.id}")
 
-                book_id_text = _input_text("Įveskite knygos ID (pvz: 123e...): ").strip()
+                book_id_text = _input_text("\nĮveskite knygos ID: ").strip()
                 try:
                     book_id = UUID(book_id_text)
                 except Exception:
-                    print("Neteisingas ID formatas.")
+                    last_message = "☠️❌ Neteisingas ID formatas."
                     continue
 
                 days = _ask_int("Kiek dienų norite pasiimti knygą? (pvz 14): ", min_value=1, max_value=365)
 
                 library.lend_book(reader.reader_card_id, book_id, days=days, max_books=3)
                 save()
-                print("✅ Knyga sėkmingai paimta!")
+                last_message = "✅ Knyga sėkmingai paimta!"
 
             except Exception as e:
-                print(f"Klaida: {e}")
-
-
+                last_message = f"☠️❌ Klaida: {e}"
 
         elif selection == "2":
             taken = reader.taken_book_ids
             if not taken:
-                print("Neturite pasiimtų knygų.")
+                last_message = "☠️❌ Neturite pasiimtų knygų."
                 continue
 
             print("Jūsų pasiimtos knygos:")
@@ -74,55 +80,74 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
                     else:
                         print(f"{book.name} — {book.author} | id={book.id}")
 
-            answer = _ask_choice("Ar norite grąžinti knygą? (1-Taip, 2-Ne): ", {"1", "2"})
+            answer = _ask_choice("\nAr norite grąžinti knygą? (1-Taip, 2-Ne): ", {"1", "2"})
             if answer == "1":
                 book_id_text = _input_text("Įveskite knygos ID grąžinimui: ").strip()
                 try:
                     book_id = UUID(book_id_text)
                 except Exception:
-                    print("Neteisingas ID formatas.")
+                    last_message = "☠️❌ Neteisingas ID formatas."
                     continue
 
                 try:
                     library.return_book(reader.reader_card_id, book_id)
                     save()
-                    print("✅ Knyga sėkmingai gražinta.")
+                    last_message = "✅ Knyga sėkmingai grąžinta."
                 except Exception as e:
-                    print(f"😱☠️ Klaida: {e}")
-
+                    last_message = f"☠️❌ Klaida: {e}"
+            else:
+                last_message = ""
 
         elif selection == "3":
             if library.reader_has_overdue(reader.reader_card_id):
-                print("Turite vėluojančių knygų!")
+                print("⏰ Turite vėluojančių knygų!")
                 overdue_loans = library.list_overdue_loans()
+
+                found_any = False
                 for loan in overdue_loans:
                     if loan.reader_card_id == reader.reader_card_id:
                         book = library.books.get(loan.book_id)
                         if book:
                             print(f"VĖLUOJA: {book.name} — terminas buvo {loan.return_date.date()} | id={book.id}")
+                            found_any = True
+
+                if not found_any:
+                    print("Vėluojančių paskolų nerasta (nors reader_has_overdue grąžino True).")
+
             else:
                 print("✅ Vėluojančių knygų nėra.")
 
-
+            input("\nSpauskite Enter, kad grįžti į meniu...")
+            last_message = ""
 
         elif selection == "4":
             books = library.list_all_books()
             if not books:
-                print("🪦 Įvyko gaisras!!! Knygų bibliotekoje nebėra!")
-            for b in books:
-                print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | kopijos={b.copies} |\n")
+                print("😱 Įvyko gaisras!!! Knygų bibliotekoje nebėra!")
+            else:
+                for b in books:
+                    available = library.available_copies(b.id)
+                    status = "LAISVA" if available > 0 else "PAIMTA"
+                    print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | {status} | laisva {available}/{b.copies} | id={b.id}")
 
-
+            input("\nSpauskite Enter, kad grįžti į meniu...")
+            last_message = ""
 
         elif selection == "5":
             text = _input_text("Įveskite pavadinimą arba autorių: ")
             results = library.search_books(text)
+
             if not results:
                 print("Nerasta.")
-            for b in results:
-                available = library.available_copies(b.id)
-                status = "LAISVA" if available > 0 else "PAIMTA"
-                print(f"{b.name} — {b.author} ({b.year}) | {status} | laisva {available}/{b.copies} | id={b.id}\n")
+            else:
+                for b in results:
+                    available = library.available_copies(b.id)
+                    status = "LAISVA" if available > 0 else "PAIMTA"
+                    print(f"{b.name} — {b.author} ({b.year}) | {status} | laisva {available}/{b.copies} | id={b.id}")
+
+            input("\nSpauskite Enter, kad grįžti į meniu...")
+            last_message = ""
 
         elif selection == "9":
             return
+
