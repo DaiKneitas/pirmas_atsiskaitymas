@@ -97,7 +97,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
         elif selection == "7":
             print(f"Dabartinė data: {library.now().date()}")
 
-            year = _ask_int("Įveskite metus: ", min_value=0, max_value=3000)
+            year = _ask_int("Įveskite metus: ", min_value=2026, max_value=3000)
             month = _ask_int("Įveskite mėnesį (1-12): ", min_value=1, max_value=12)
             day = _ask_int("Įveskite dieną (1-31): ", min_value=1, max_value=31)
 
