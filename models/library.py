@@ -32,9 +32,9 @@ class Library:
         password = password.strip()
 
         if not user_name or not password:
-            raise ValueError("Vardas ir slaptažodis negali būti tušti.")
+            raise ValueError("❌ Vardas ir slaptažodis negali būti tušti.")
         if user_name in self.librarians:
-            raise ValueError("Toks bibliotekininkas jau egzistuoja.")
+            raise ValueError("❌ Toks bibliotekininkas jau egzistuoja.")
 
         libr = Librarian(user_name, password)
         self.librarians[user_name] = libr
@@ -63,7 +63,7 @@ class Library:
         password = password.strip()
 
         if not name or not last_name or not password:
-            raise ValueError("Vardas, pavardė ir slaptažodis negali būti tušti.")
+            raise ValueError("❌ Vardas, pavardė ir slaptažodis negali būti tušti.")
 
         card_id = self._generate_reader_card_id(name, last_name)
         reader = Reader(name, last_name, card_id, password)
@@ -86,14 +86,14 @@ class Library:
         genre = genre.strip()
 
         if not name or not author or not genre:
-            raise ValueError("Pavadinimas, autorius ir žanras negali būti tušti.")
+            raise ValueError("❌ Pavadinimas, autorius ir žanras negali būti tušti.")
 
         current_year = dt.datetime.now().year
         if year < -5000 or year > 2100:
-            raise ValueError("Neteisingi išleidimo metai.")
+            raise ValueError("❌ Neteisingi išleidimo metai.")
 
         if copies < 1:
-            raise ValueError("Kopijų skaičius turi būti bent 1.")
+            raise ValueError("❌ Kopijų skaičius turi būti bent 1.")
 
         book = Book(name, author, year, genre, copies=copies)
         self.books[book.id] = book
@@ -201,22 +201,22 @@ class Library:
 
     def lend_book(self, reader_card_id, book_id, days=DEFAULT_LOAN_DAYS, max_books=MAX_BOOKS_PER_READER):
         if reader_card_id not in self.readers:
-            raise ValueError("Nerastas skaitytojas su tokiu kortelės numeriu.")
+            raise ValueError("❌ Nerastas skaitytojas su tokiu kortelės numeriu.")
         if book_id not in self.books:
-            raise ValueError("Nerasta tokia knyga.")
+            raise ValueError("❌ Nerasta tokia knyga.")
         if days <= 0:
-            raise ValueError("Dienų skaičius turi būti teigiamas.")
+            raise ValueError("❌ Dienų skaičius turi būti teigiamas.")
 
         reader = self.readers[reader_card_id]
 
         if len(reader.taken_book_ids) >= max_books:
-            raise ValueError(f"Pasiektas paimtų knygų limitas. Galima pasiimti tik {max_books} knygas")
+            raise ValueError(f"❌ Pasiektas paimtų knygų limitas. Galima pasiimti tik {max_books} knygas")
 
         if self.reader_has_overdue(reader_card_id):
-            raise ValueError("Negalima pasiimti knygos: turite vėluojančią knygą!")
+            raise ValueError("❌ Negalima pasiimti knygos: turite vėluojančią knygą!")
 
         if self.available_copies(book_id) <= 0:
-            raise ValueError("Šiuo metu nėra laisvų šios knygos kopijų.")
+            raise ValueError("❌ Šiuo metu nėra laisvų šios knygos kopijų.")
 
         borrow_date = dt.datetime.now()
         return_date = borrow_date + dt.timedelta(days=days)
@@ -238,7 +238,7 @@ class Library:
 
     def return_book(self, reader_card_id, book_id):
         if reader_card_id not in self.readers:
-            raise ValueError("Nerastas skaitytojas su tokiu kortelės numeriu.")
+            raise ValueError("❌ Nerastas skaitytojas su tokiu kortelės numeriu.")
 
         loan_index = None
         for i, loan in enumerate(self.loans):
@@ -247,7 +247,7 @@ class Library:
                 break
 
         if loan_index is None:
-            raise ValueError("Šis skaitytojas nėra paėmęs šios knygos.")
+            raise ValueError("❌ Šis skaitytojas nėra paėmęs šios knygos.")
 
         del self.loans[loan_index]
 

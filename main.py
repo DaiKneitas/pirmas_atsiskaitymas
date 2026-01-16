@@ -38,7 +38,7 @@ def main():
 			elif role == "reader":
 				reader_meniu(library, user_obj, save)
 	except Exception as e:
-		print(f"Klaida: {e}")
+		print(f"😱☠️ Klaida: {e}")
 
 
 if __name__ == "__main__":

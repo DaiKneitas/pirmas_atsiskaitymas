@@ -31,7 +31,7 @@ Registracija naujiems programos vartotojams
             librarian = library.authenticate_librarian(user_name, password)
             if librarian:
                 return ("librarian", librarian)
-            print("xxx --- Neteisingai suvesti prisijungimo duomenys! --- xxx")
+            print("❌❌❌ --- Neteisingai suvesti prisijungimo duomenys! --- ❌❌❌")
 
 
         # Skaitytojo prisijungimas
@@ -43,7 +43,7 @@ Registracija naujiems programos vartotojams
             reader = library.authenticate_reader(card_id, password)
             if reader:
                 return ("reader", reader)
-            print("xxx --- Neteisingai suvesti prisijungimo duomenys! --- xxx")
+            print("❌❌❌ --- Neteisingai suvesti prisijungimo duomenys! --- ❌❌❌")
 
 
         # Bibliotekininko paskyros sukūrimas
@@ -54,9 +54,9 @@ Registracija naujiems programos vartotojams
             try:
                 library.add_librarian(user_name, password)
                 save()
-                print("Bibliotekininkas sukurtas. Dabar prisijunkite.")
+                print("✅ Bibliotekininkas sukurtas. Dabar prisijunkite.")
             except Exception as e:
-                print(f"Klaida: {e}")
+                print(f"😱☠️ Klaida: {e}")
 
 
         # Skaitytojo paskyros sukūrimas
@@ -68,12 +68,12 @@ Registracija naujiems programos vartotojams
             try:
                 reader = library.register_reader(name, last_name, password)
                 save()
-                print(f"Skaitytojas sukurtas! Jūsų kortelės numeris: {reader.reader_card_id}")
+                print(f"✅ Skaitytojas sukurtas! Jūsų kortelės numeris: {reader.reader_card_id}")
                 
                 # auto-login sukūrus skaitytoją
                 return ("reader", reader)
             except Exception as e:
-                print(f"Klaida: {e}")
+                print(f"😱☠️ Klaida: {e}")
 
         elif selection == "9":
             return

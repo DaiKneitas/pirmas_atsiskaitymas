@@ -33,15 +33,15 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
 
                 book = library.add_book(name, author, year, genre, copies=copies)
                 save()
-                print(f"Knyga pridėta. ID: {book.id}")
+                print(f"✅ Knyga pridėta. ID: {book.id}")
 
             except Exception as e:
-                print(f"Klaida: {e}")
+                print(f"😱☠️ Klaida: {e}")
 
         elif selection == "2":
             older_than = _ask_int("Pašalinti knygas senesnes nei (metai): ", min_value=-5000, max_value=2100)
             deleted = library.delete_old_books(older_than)
-            print(f"Pašalinta knygų: {deleted}")
+            print(f"✅ Pašalinta knygų: {deleted}")
             save()
 
         elif selection == "3":
@@ -49,13 +49,13 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             if not books:
                 print("Įvyko gaisras!!! Knygų bibliotekoje nebėra!")
             for b in books:
-                print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | kopijos={b.copies} |")
+                print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | kopijos={b.copies} |\n")
 
 
         elif selection == "4":
             overdue = library.list_overdue_loans()
             if not overdue:
-                print("Vėluojančių knygų nėra.")
+                print("✅ Vėluojančių knygų nėra.")
             for loan in overdue:
                 b = library.books[loan.book_id]
                 print(f"VĖLUOJA: {b.name} — {b.author} | kortelė={loan.reader_card_id} | terminas={loan.return_date.date()}")
@@ -105,10 +105,10 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
                 
                 library.starter_pack_added = True
                 save()
-                print(f"Pridėtas startinis knygų paketas. Pridėta knygų: {added}")
+                print(f"✅ Pridėtas startinis knygų paketas. Pridėta knygų: {added}")
 
             except Exception as e:
-                print(f"Klaida: {e}")
+                print(f"😱☠️ Klaida: {e}")
 
         elif selection == "9":
             return

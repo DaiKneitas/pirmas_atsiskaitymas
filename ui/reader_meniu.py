@@ -38,7 +38,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
                 print("Laisvos knygos:")
                 for b in available_books:
                     available = library.available_copies(b.id)
-                    print(f"{b.name} — {b.author} ({b.year}) | laisva {available}/{b.copies} | id={b.id}")
+                    print(f"{b.name} — {b.author} ({b.year}) | laisva {available}/{b.copies} | id={b.id}\n")
 
                 book_id_text = _input_text("Įveskite knygos ID (pvz: 123e...): ").strip()
                 try:
@@ -86,9 +86,9 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
                 try:
                     library.return_book(reader.reader_card_id, book_id)
                     save()
-                    print("Knyga grąžinta.")
+                    print("✅ Knyga sėkmingai gražinta.")
                 except Exception as e:
-                    print(f"Klaida: {e}")
+                    print(f"😱☠️ Klaida: {e}")
 
 
         elif selection == "3":
@@ -101,7 +101,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
                         if book:
                             print(f"VĖLUOJA: {book.name} — terminas buvo {loan.return_date.date()} | id={book.id}")
             else:
-                print("Vėluojančių knygų nėra.")
+                print("✅ Vėluojančių knygų nėra.")
 
 
 
@@ -110,7 +110,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
             if not books:
                 print("Įvyko gaisras!!! Knygų bibliotekoje nebėra!")
             for b in books:
-                print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | kopijos={b.copies} |")
+                print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | kopijos={b.copies} |\n")
 
 
 
