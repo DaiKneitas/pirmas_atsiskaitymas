@@ -1,2 +1,9 @@
 __pycache__
+
+# all pickle files
 *.pickle
+
+# PyInstaller
+build/
+dist/
+*.spec

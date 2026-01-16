@@ -3,6 +3,7 @@ import random
 from models.book import Book
 from models.reader import Reader
 from models.librarian import Librarian
+from config import MAX_BOOKS_PER_READER, DEFAULT_LOAN_DAYS
 
 
 class Loan:
@@ -198,7 +199,7 @@ class Library:
         return None
 
 
-    def lend_book(self, reader_card_id, book_id, days=14, max_books=3):
+    def lend_book(self, reader_card_id, book_id, days=DEFAULT_LOAN_DAYS, max_books=MAX_BOOKS_PER_READER):
         if reader_card_id not in self.readers:
             raise ValueError("Nerastas skaitytojas su tokiu kortelės numeriu.")
         if book_id not in self.books:
