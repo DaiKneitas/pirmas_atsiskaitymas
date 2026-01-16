@@ -108,7 +108,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
         elif selection == "4":
             books = library.list_all_books()
             if not books:
-                print("Įvyko gaisras!!! Knygų bibliotekoje nebėra!")
+                print("🪦 Įvyko gaisras!!! Knygų bibliotekoje nebėra!")
             for b in books:
                 print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | kopijos={b.copies} |\n")
 
@@ -122,7 +122,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
             for b in results:
                 available = library.available_copies(b.id)
                 status = "LAISVA" if available > 0 else "PAIMTA"
-                print(f"{b.name} — {b.author} ({b.year}) | {status} | laisva {available}/{b.copies} | id={b.id}")
+                print(f"{b.name} — {b.author} ({b.year}) | {status} | laisva {available}/{b.copies} | id={b.id}\n")
 
         elif selection == "9":
             return
