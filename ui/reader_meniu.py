@@ -7,6 +7,7 @@ def reader_meniu(library, reader, save):
         overdue_count = library.overdue_count_for_reader_meniu(reader.reader_card_id)
 
         selection = _ask_choice(f"""
+--------------------------------------------------------------------
 Sveiki prisijungę prie bibliotekos!
 Prisijungęs skaitytojas: {reader.name}
 Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_count}
@@ -20,6 +21,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
 5) Ieškoti knygų bibliotekoje, pagal knygos pavadinimą arba autorių.
 --------------------------------------------------------------------
 9) Atsijungti
+--------------------------------------------------------------------
 """, {"1","2","3","4","5","9"})
         
         if selection == "1":

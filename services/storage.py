@@ -1,6 +1,5 @@
 import pickle, os
 
-
 def save_file(file_name, content):
     with open(file_name, "wb") as f:
         pickle.dump(content, f)

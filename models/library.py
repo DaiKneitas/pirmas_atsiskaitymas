@@ -1,5 +1,4 @@
 import datetime as dt
-from uuid import UUID
 import random
 from models.book import Book
 from models.reader import Reader
@@ -89,7 +88,7 @@ class Library:
             raise ValueError("Pavadinimas, autorius ir žanras negali būti tušti.")
 
         current_year = dt.datetime.now().year
-        if year < -5000 or year > current_year + 1:
+        if year < -5000 or year > 2100:
             raise ValueError("Neteisingi išleidimo metai.")
 
         if copies < 1:
@@ -156,8 +155,9 @@ class Library:
             del self.books[book_id]
 
         return len(to_delete)
-    
 
+
+    # future_day_test = dt.datetime(2027,1,1)    # for testing overdue
     def reader_has_overdue(self, reader_card_id, now=None):
         if now is None:
             now = dt.datetime.now()
@@ -170,7 +170,9 @@ class Library:
     
 
     def list_overdue_loans(self, now=None):
-        now = now or dt.datetime.now()
+        if now is None:
+            now = dt.datetime.now()
+
         overdue = []
         for loan in self.loans:
             if loan.return_date < now:
@@ -207,7 +209,7 @@ class Library:
         reader = self.readers[reader_card_id]
 
         if len(reader.taken_book_ids) >= max_books:
-            raise ValueError("Pasiektas knygų limitas.")
+            raise ValueError(f"Pasiektas paimtų knygų limitas. Galima pasiimti tik {max_books} knygas")
 
         if self.reader_has_overdue(reader_card_id):
             raise ValueError("Negalima pasiimti knygos: turite vėluojančią knygą!")

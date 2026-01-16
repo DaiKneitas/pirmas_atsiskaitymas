@@ -4,6 +4,7 @@ from starter_books.starter_books import starter_books
 def librarian_meniu(library, librarian, save):
     while True:
         selection = _ask_choice(f"""
+--------------------------------------------------------------------
 Bibliotekos valdymas
 Prisijungęs bibliotekininkas: {librarian.user_name}
 Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis: {len(library.loans)}
@@ -19,6 +20,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
 --------------------------------------------------------------------
 8) Pridėti startinį knygų paketą į biblioteką (100 skirtingų knygų)
 9) Atsijungti
+--------------------------------------------------------------------
 """, {"1","2","3","4","5","6","8","9"})
 
         if selection == "1":
@@ -26,7 +28,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
                 name = _input_text("Pavadinimas: ").strip()
                 author = _input_text("Autorius: ").strip()
                 year = _ask_int("Metai: ", min_value=-5000, max_value=2100)
-                genre = _input_text("Žanras: ").strip()
+                genre = _input_text("Žanras (Fantasy, Science fiction, Cyberpunk, Modernist, Novella, Short stories, Historical fiction, Adventure, etc): ").strip()
                 copies = _ask_int("Kopijų skaičius: ", min_value=1)
 
                 book = library.add_book(name, author, year, genre, copies=copies)
@@ -85,7 +87,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             print(f"Viso knygų: {stats['total_books']}")
             print(f"Išduotų knygų kiekis: {stats['total_loans']}")
             print(f"Vėluojančių negražintų knygų: {stats['overdue_count']}")
-            print(f"Vid. vėlavimo dienos: {stats['avg_overdue_days']:.2f}")
+            print(f"Kiek dienų vidutiniškai vėluoja knygos: {stats['avg_overdue_days']:.0f}")
             print(f"Kokio žanro knygų yra daugiausiai bibliotekoje: {most_common}")
             print(f"Kokio žanro knygos yra daugiausiai imamos: {most_borrowed}")
 
@@ -93,7 +95,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
         elif selection == "8":
             if library.starter_pack_added:
                 print("Startinis knygų paketas jau buvo pridėtas.")
-                return
+                continue
             
             try:
                 added = 0
