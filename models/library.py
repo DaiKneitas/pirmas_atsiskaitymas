@@ -21,6 +21,8 @@ class Library:
         self.readers = {}               
         self.librarians = {}
         self.starter_pack_added = False
+        self.current_date = dt.datetime.now()
+
         # statistikai
         self.borrowed_genre_counts = {}
 
@@ -156,12 +158,19 @@ class Library:
             del self.books[book_id]
 
         return len(to_delete)
+    
+    def now(self):
+        return self.current_date
+
+
+    def set_current_date(self, year, month, day):
+        self.current_date = dt.datetime(year, month, day)
 
 
     # future_day_test = dt.datetime(2027,1,1)    # for testing overdue
     def reader_has_overdue(self, reader_card_id, now=None):
         if now is None:
-            now = dt.datetime.now()
+            now = self.now()
 
         for loan in self.loans:
             if loan.reader_card_id == reader_card_id and loan.return_date < now:
@@ -172,7 +181,7 @@ class Library:
 
     def list_overdue_loans(self, now=None):
         if now is None:
-            now = dt.datetime.now()
+            now = self.now()
 
         overdue = []
         for loan in self.loans:
@@ -183,7 +192,7 @@ class Library:
 
     def overdue_count_for_reader_meniu(self, reader_card_id, now=None):
         if now is None:
-            now = dt.datetime.now()
+            now = self.now()
 
         count = 0
         for loan in self.loans:
@@ -218,7 +227,7 @@ class Library:
         if self.available_copies(book_id) <= 0:
             raise ValueError("❌ Šiuo metu nėra laisvų šios knygos kopijų.")
 
-        borrow_date = dt.datetime.now()
+        borrow_date = self.now()
         return_date = borrow_date + dt.timedelta(days=days)
 
         new_loan = Loan(book_id, reader_card_id, borrow_date, return_date)
@@ -261,11 +270,15 @@ class Library:
     # ----- Library statistics -----
     def statistics(self, now=None):
         if now is None:
-            now = dt.datetime.now()
+            now = self.now()
 
         total_books = len(self.books)
-        total_loans = len(self.loans)
 
+        total_copies = 0
+        for book in self.books.values():
+            total_copies += book.copies
+
+        total_loans = len(self.loans)
         overdue_loans = self.list_overdue_loans(now)
         overdue_count = len(overdue_loans)
 
@@ -301,6 +314,7 @@ class Library:
 
         return {
             "total_books": total_books,
+            "total_copies": total_copies,
             "total_loans": total_loans,
             "overdue_count": overdue_count,
             "avg_overdue_days": avg_overdue_days,

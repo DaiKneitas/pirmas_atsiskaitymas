@@ -18,10 +18,11 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
 5) Ieškoti knygų bibliotekoje, pagal knygos pavadinimą arba autorių.
 6) Peržiūrėti bibliotekos statistiką
 --------------------------------------------------------------------
+7) Pakeisti dabartinę datą (testavimui)
 8) Pridėti startinį knygų paketą į biblioteką (100 skirtingų knygų)
 9) Atsijungti
 --------------------------------------------------------------------
-""", {"1","2","3","4","5","6","8","9"})
+""", {"1","2","3","4","5","6","7","8","9"})
 
         if selection == "1":
             try:
@@ -69,7 +70,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             for b in results:
                 available = library.available_copies(b.id)
                 status = "LAISVA" if available > 0 else "PAIMTA"
-                print(f"{b.name} — {b.author} ({b.year}) | {status} | laisva {available}/{b.copies} | id={b.id}")
+                print(f"{b.name} — {b.author} ({b.year}) | {status} | laisva {available}/{b.copies} | id={b.id}\n")
 
 
         elif selection == "6":
@@ -84,7 +85,8 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
                 most_borrowed = "Nėra duomenų"
 
             print("---- Statistika ----")
-            print(f"Viso knygų: {stats['total_books']}")
+            print(f"Viso knygų bibliotekoje (be kopijų): {stats['total_books']}")
+            print(f"Bendrai knygų bibliotekoje (su kopijomis): {stats['total_copies']}")
             print(f"Išduotų knygų kiekis: {stats['total_loans']}")
             print(f"Vėluojančių negražintų knygų: {stats['overdue_count']}")
             print(f"Kiek dienų vidutiniškai vėluoja knygos: {stats['avg_overdue_days']:.0f}")
@@ -92,9 +94,24 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             print(f"Kokio žanro knygos yra daugiausiai imamos: {most_borrowed}")
 
 
+        elif selection == "7":
+            print(f"Dabartinė data: {library.now().date()}")
+
+            year = _ask_int("Įveskite metus: ", min_value=0, max_value=3000)
+            month = _ask_int("Įveskite mėnesį (1-12): ", min_value=1, max_value=12)
+            day = _ask_int("Įveskite dieną (1-31): ", min_value=1, max_value=31)
+
+            try:
+                library.set_current_date(year, month, day)
+                save()
+                print(f"✅ Nauja dabartinė data: {library.now().date()}")
+            except Exception as e:
+                print(f"❌ Neteisinga data: {e}")
+
+
         elif selection == "8":
             if library.starter_pack_added:
-                print("Startinis knygų paketas jau buvo pridėtas.")
+                print("❌ Startinis knygų paketas jau buvo pridėtas.")
                 continue
             
             try:
