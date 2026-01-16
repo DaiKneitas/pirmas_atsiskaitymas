@@ -90,7 +90,6 @@ class Library:
         if not name or not author or not genre:
             raise ValueError("❌ Pavadinimas, autorius ir žanras negali būti tušti.")
 
-        current_year = dt.datetime.now().year
         if year < -5000 or year > 2100:
             raise ValueError("❌ Neteisingi išleidimo metai.")
 
