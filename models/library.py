@@ -158,6 +158,9 @@ class Library:
 
         return len(to_delete)
     
+
+
+    # ----- metodai datos pakeitimui -----
     def now(self):
         return self.current_date
 
@@ -166,7 +169,8 @@ class Library:
         self.current_date = dt.datetime(year, month, day)
 
 
-    # future_day_test = dt.datetime(2027,1,1)    # for testing overdue
+
+    # ----- metodai knygų išdavimui / gražinimui ir negražintų knygų patikrai -----
     def reader_has_overdue(self, reader_card_id, now=None):
         if now is None:
             now = self.now()
@@ -234,7 +238,7 @@ class Library:
 
         reader.taken_book_ids.append(book_id)
 
-        # update stats
+        # statistikai
         genre = self.books[book_id].genre
         if genre in self.borrowed_genre_counts:
             self.borrowed_genre_counts[genre] += 1
@@ -281,7 +285,7 @@ class Library:
         overdue_loans = self.list_overdue_loans(now)
         overdue_count = len(overdue_loans)
 
-        # average overdue days (only for overdue loans)
+        # average overdue days
         overdue_days_sum = 0
         for loan in overdue_loans:
             overdue_days_sum += (now - loan.return_date).days

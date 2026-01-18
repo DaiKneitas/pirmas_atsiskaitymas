@@ -15,6 +15,7 @@ def main():
 		if library is None:
 			library = Library()
 
+		# callback function
 		def save():
 			save_file(DATA_FILE, library)
 

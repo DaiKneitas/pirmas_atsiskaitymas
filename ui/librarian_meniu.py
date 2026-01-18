@@ -1,4 +1,5 @@
 from utils.helper_functions import _input_text, _ask_choice, _ask_int, _clear_screen
+from utils.print_tables import _print_books_table, _print_overdue_table
 from starter_books.starter_books import starter_books
 
 def librarian_meniu(library, librarian, save):
@@ -16,6 +17,8 @@ def librarian_meniu(library, librarian, save):
 Bibliotekos valdymas
 Prisijungęs bibliotekininkas: {librarian.user_name}
 Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis: {len(library.loans)}
+
+
 
 Įveskite skaičių esantį prie vieno iš šių galimų veiksmų:
 
@@ -58,24 +61,17 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
 
         elif selection == "3":
             books = library.list_all_books()
-            if not books:
-                print("😱 Įvyko gaisras!!! Knygų bibliotekoje nebėra!")
-            else:
-                for b in books:
-                    print(f"{b.name} — {b.author} ({b.year}) [{b.genre}] | kopijos={b.copies}")
+            _print_books_table(library, books)
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
+
         elif selection == "4":
             overdue = library.list_overdue_loans()
-            if not overdue:
-                print("✅ Vėluojančių knygų nėra.")
-            else:
-                for loan in overdue:
-                    b = library.books[loan.book_id]
-                    print(f"VĖLUOJA: {b.name} — {b.author} | kortelė={loan.reader_card_id} | terminas={loan.return_date.date()}")
+            _print_overdue_table(library, overdue)
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
+
 
         elif selection == "5":
             text = _input_text("Įveskite pavadinimą arba autorių: ")
@@ -83,10 +79,8 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             if not results:
                 print("Nerasta.")
             else:
-                for b in results:
-                    available = library.available_copies(b.id)
-                    status = "LAISVA" if available > 0 else "PAIMTA"
-                    print(f"{b.name} — {b.author} ({b.year}) | {status} | laisva {available}/{b.copies} | id={b.id}")
+                _print_books_table(library, results)
+
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
