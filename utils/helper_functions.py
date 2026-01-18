@@ -1,9 +1,9 @@
 import os
 
 # Pagalbine funkcija vartotojo input patikrai, kad nebutu paliktas tuscias laukas
-def _input_text(text_for_user, min_length=1):
+def _input_text(prompt, min_length=1):
     while True:
-        user_input = input(text_for_user)
+        user_input = input(prompt)
         if len(user_input) >= min_length:
             return user_input
         
