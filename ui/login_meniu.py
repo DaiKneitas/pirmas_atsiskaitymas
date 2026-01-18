@@ -1,5 +1,3 @@
-# login_meniu.py
-
 from utils.helper_functions import _ask_choice, _input_text, _clear_screen
 
 def login_meniu(library, save):
@@ -41,6 +39,8 @@ Registracija naujiems programos vartotojams
 
             last_message = "☠️❌ Neteisingai suvesti bibliotekininko prisijungimo duomenys!"
 
+
+
         elif selection == "2":
             print("--- Skaitytojo prisijungimas ---")
             card_id = _input_text("Įveskite savo kortelės numerį: ")
@@ -51,6 +51,8 @@ Registracija naujiems programos vartotojams
                 return ("reader", reader)
 
             last_message = "☠️❌ Neteisingai suvesti skaitytojo prisijungimo duomenys!"
+
+
 
         elif selection == "3":
             print("--- Bibliotekininko registracija ---")
@@ -63,6 +65,8 @@ Registracija naujiems programos vartotojams
                 last_message = "✅ Bibliotekininkas sukurtas. Dabar prisijunkite."
             except Exception as e:
                 last_message = f"☠️❌ Klaida: {e}"
+
+
 
         elif selection == "4":
             print("--- Skaitytojo registracija ---")
@@ -82,6 +86,8 @@ Registracija naujiems programos vartotojams
 
             except Exception as e:
                 last_message = f"☠️❌ Klaida: {e}"
+
+
 
         elif selection == "9":
             return None
