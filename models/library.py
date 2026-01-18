@@ -83,11 +83,18 @@ class Library:
         if not name or not author or not genre:
             raise ValueError("☠️❌ Pavadinimas, autorius ir žanras negali būti tušti.")
 
-        if year < -5000 or year > 2100:
+        if year < -1000 or year > 2100:
             raise ValueError("☠️❌ Neteisingi išleidimo metai.")
 
         if copies < 1:
             raise ValueError("☠️❌ Kopijų skaičius turi būti bent 1.")
+        
+        name_check = name.lower()
+        author_check = author.lower()
+        for libr_book in self.books.values():
+            if libr_book.name.lower() == name_check and libr_book.author.lower() == author_check and libr_book.year == year:
+                libr_book.copies += copies
+                return libr_book
 
         book = Book(name, author, year, genre, copies=copies)
         self.books[book.id] = book

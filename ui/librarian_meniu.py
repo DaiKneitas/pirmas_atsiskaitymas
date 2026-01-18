@@ -36,25 +36,25 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             try:
                 name = _input_text("Pavadinimas: ").strip()
                 author = _input_text("Autorius: ").strip()
-                year = _ask_int("Metai: ", min_value=-5000, max_value=2100)
+                year = _ask_int("Metai: ", min_value=-1000, max_value=2100)
                 genre = _input_text("Žanras: ").strip()
                 copies = _ask_int("Kopijų skaičius: ", min_value=1)
 
                 book = library.add_book(name, author, year, genre, copies=copies)
                 save()
-                last_message = f"✅ Knyga pridėta. ID: {book.id}"
+                last_message = f"✅ Knyga pridėta / papildytos kopijos. ID: {book.id} | kopijos={book.copies}"
 
             except Exception as e:
-                last_message = f"☠️❌ Klaida: {e}"
+                last_message = f"Klaida: {e}"
 
         elif selection == "2":
             try:
-                older_than = _ask_int("Pašalinti knygas senesnes nei (metai): ", min_value=-5000, max_value=2100)
+                older_than = _ask_int("Pašalinti knygas senesnes nei (metai): ", min_value=-1000, max_value=2101)
                 deleted = library.delete_old_books(older_than)
                 save()
                 last_message = f"✅ Pašalinta knygų: {deleted}"
             except Exception as e:
-                last_message = f"☠️❌ Klaida: {e}"
+                last_message = f"Klaida: {e}"
 
         elif selection == "3":
             books = library.list_all_books()
@@ -119,7 +119,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
                 last_message = f"✅ Nauja dabartinė data: {library.now().date()}"
 
             except Exception as e:
-                last_message = f"☠️❌ Neteisinga data: {e}"
+                last_message = f"Neteisinga data: {e}"
 
         elif selection == "8":
             if library.starter_pack_added:

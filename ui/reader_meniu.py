@@ -1,5 +1,6 @@
 from uuid import UUID
 from utils.helper_functions import _input_text, _ask_choice, _ask_int, _clear_screen
+from config import MAX_BOOKS_PER_READER
 
 def reader_meniu(library, reader, save):
     last_message = ""
@@ -57,7 +58,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
 
                 days = _ask_int("Kiek dienų norite pasiimti knygą? (pvz 14): ", min_value=1, max_value=365)
 
-                library.lend_book(reader.reader_card_id, book_id, days=days, max_books=3)
+                library.lend_book(reader.reader_card_id, book_id, days=days, max_books=MAX_BOOKS_PER_READER)
                 save()
                 last_message = "✅ Knyga sėkmingai paimta!"
 
