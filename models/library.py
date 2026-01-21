@@ -268,6 +268,27 @@ class Library:
             reader.taken_book_ids.remove(book_id)
 
     
+    # Delspinigiu skaiciavimas
+    def calculate_fine(self, reader_card_id, now=None):
+        if reader_card_id not in self.readers:
+            raise ValueError("☠️❌ Nerastas skaitytojas su tokiu kortelės numeriu.")
+        
+        if now is None:
+            now = self.now()
+
+        fine_one_day = 0.5
+        overdue_days = 0
+
+        for loan in self.loans:
+            if loan.reader_card_id != reader_card_id:
+                continue
+
+            if loan.return_date < now:
+                days_late = (now - loan.return_date).days
+                overdue_days += days_late
+
+        fine = fine_one_day * overdue_days
+        return fine, overdue_days
 
 
     # ----- Library statistics -----

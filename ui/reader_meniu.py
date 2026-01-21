@@ -29,15 +29,17 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
 3) Pasitikrinti ar nėra vėluojančių knygų
 4) Peržiūrėti visas bibliotekos knygas
 5) Ieškoti knygų bibliotekoje, pagal knygos pavadinimą arba autorių.
+6) Pažiūrėti kiek yra priskaičiuota delspinigių
 --------------------------------------------------------------------
 9) Atsijungti
 --------------------------------------------------------------------
-""", {"1","2","3","4","5","9"})
+""", {"1","2","3","4","5","6","9"})
 
         if selection == "1":
-            try:
-                if library.reader_has_overdue(reader.reader_card_id):
-                    last_message = "☠️❌ Turite vėluojančių knygų! Pirmiausia grąžinkite jas!"
+            try:         
+                fine, overdue_days = library.calculate_fine(reader.reader_card_id)
+                if overdue_days > 0:
+                    last_message = f"☠️❌ Turite vėluojančių knygų ({overdue_days} d.) ir delspinigių {fine:.2f} EUR!"
                     continue
 
                 available_books = library.list_available_books()
@@ -143,6 +145,15 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
             else:
                 _print_books_table(library, results)
 
+            input("\nSpauskite Enter, kad grįžti į meniu...")
+            last_message = ""
+
+        
+        elif selection == "6":
+            fine, overdue_days = library.calculate_fine(reader.reader_card_id)
+            print(f"Priskaičiuoti delspinigiai: {fine:.2f} EUR.\n"
+                  f"Delspinigių dienos: {overdue_days}")
+            
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
