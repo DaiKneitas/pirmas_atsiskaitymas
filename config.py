@@ -1,6 +1,6 @@
 # --- Storage ---
 DATA_FILE = "data/library_data.pickle"
-DB_PATH = "database/library_data.db"
+DB_FILE = "database/library_data.db"
 
 # --- Default accounts (for demo/testing) ---
 DEFAULT_LIBRARIAN_USERNAME = "admin"
