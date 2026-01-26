@@ -7,9 +7,13 @@ def main():
 		from ui.login_meniu import login_meniu
 		from ui.librarian_meniu import librarian_meniu
 		from ui.reader_meniu import reader_meniu
-		from config import DATA_FILE, DEFAULT_LIBRARIAN_USERNAME, DEFAULT_LIBRARIAN_PASSWORD
+		from services.db_tables import library_tables, get_connection
+		from config import DB_PATH, DATA_FILE, DEFAULT_LIBRARIAN_USERNAME, DEFAULT_LIBRARIAN_PASSWORD
 
 		os.makedirs("data", exist_ok=True)
+		os.makedirs("database_files", exist_ok=True)
+
+		library_tables(DB_PATH)
 
 		library = load_file(DATA_FILE)
 		if library is None:
