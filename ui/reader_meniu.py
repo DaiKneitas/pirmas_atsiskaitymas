@@ -3,11 +3,15 @@ from utils.helper_functions import _input_text, _ask_choice, _ask_int, _clear_sc
 from utils.print_tables import _print_books_table, _print_overdue_table
 from config import MAX_BOOKS_PER_READER, DEFAULT_LOAN_DAYS
 
-def reader_meniu(library, reader, save):
+
+def reader_meniu(library, reader):
     last_message = ""
 
     while True:
         _clear_screen()
+
+        # refresh taken ids from DB (important in DB mode)
+        reader.taken_book_ids = library._get_taken_book_ids(reader.reader_card_id)
 
         taken_count = len(reader.taken_book_ids)
         overdue_count = library.overdue_count_for_reader_meniu(reader.reader_card_id)
@@ -33,10 +37,11 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
 --------------------------------------------------------------------
 9) Atsijungti
 --------------------------------------------------------------------
-""", {"1","2","3","4","5","6","9"})
+""", {"1", "2", "3", "4", "5", "6", "9"})
 
+        # 1) Borrow
         if selection == "1":
-            try:         
+            try:
                 fine, overdue_days = library.calculate_fine(reader.reader_card_id)
                 if overdue_days > 0:
                     last_message = f"☠️❌ Turite vėluojančių knygų ({overdue_days} d.) ir delspinigių {fine:.2f} EUR!"
@@ -66,17 +71,15 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
                     reader.reader_card_id,
                     book_id,
                     days=days,
-                    max_books=MAX_BOOKS_PER_READER
+                    max_books=MAX_BOOKS_PER_READER,
                 )
 
-                save()
                 last_message = "✅ Knyga sėkmingai paimta!"
 
             except Exception as e:
                 last_message = f"☠️❌ Klaida: {e}"
 
-
-
+        # 2) List / return borrowed books
         elif selection == "2":
             taken = reader.taken_book_ids
             if not taken:
@@ -85,7 +88,11 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
 
             print("Jūsų pasiimtos knygos:")
             for book_id in taken:
-                book = library.books.get(book_id)
+                # Get book data by searching list_all_books (simple, minimal change)
+                # (If you want, later we can add db_get_book_by_id for speed)
+                all_books = library.list_all_books()
+                book = next((b for b in all_books if b.id == book_id), None)
+
                 if book:
                     loan = library.find_loan(reader.reader_card_id, book_id)
                     if loan:
@@ -98,24 +105,23 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
                 book_id_text = _input_text("Įveskite knygos ID grąžinimui: ").strip()
                 try:
                     book_id = UUID(book_id_text)
-                except Exception:
+                except ValueError:
                     last_message = "☠️❌ Neteisingas ID formatas."
                     continue
 
                 try:
                     library.return_book(reader.reader_card_id, book_id)
-                    save()
-                    last_message = "✅ Knyga sėkmingai gražinta."
+                    last_message = "✅ Knyga sėkmingai grąžinta."
                 except Exception as e:
                     last_message = f"☠️❌ Klaida: {e}"
             else:
                 last_message = ""
 
-
-
+        # 3) Overdue check (reader only)
         elif selection == "3":
             overdue_all = library.list_overdue_loans()
             overdue_reader = []
+
             for loan in overdue_all:
                 if loan.reader_card_id == reader.reader_card_id:
                     overdue_reader.append(loan)
@@ -125,8 +131,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
-
-
+        # 4) List all books
         elif selection == "4":
             books = library.list_all_books()
             _print_books_table(library, books)
@@ -134,8 +139,7 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
-
-
+        # 5) Search
         elif selection == "5":
             text = _input_text("Įveskite pavadinimą arba autorių: ")
             results = library.search_books(text)
@@ -148,16 +152,20 @@ Paimtų knygų kiekis: {taken_count} | Vėluojančių knygų kiekis: {overdue_co
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
-        
+        # 6) Fine
         elif selection == "6":
             fine, overdue_days = library.calculate_fine(reader.reader_card_id)
-            print(f"Priskaičiuoti delspinigiai: {fine:.2f} EUR.\n"
-                  f"Delspinigių dienos: {overdue_days}")
-            
+
+            print(
+                f"Priskaičiuoti delspinigiai: {fine:.2f} EUR.\n"
+                f"Delspinigių dienos: {overdue_days}"
+            )
+
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
-
+        # 9) Logout
         elif selection == "9":
             return
+
 

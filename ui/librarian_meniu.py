@@ -2,7 +2,8 @@ from utils.helper_functions import _input_text, _ask_choice, _ask_int, _clear_sc
 from utils.print_tables import _print_books_table, _print_overdue_table
 from starter_books.starter_books import starter_books
 
-def librarian_meniu(library, librarian, save):
+
+def librarian_meniu(library, librarian):
     last_message = ""
 
     while True:
@@ -12,13 +13,15 @@ def librarian_meniu(library, librarian, save):
             print(last_message)
             print()
 
+        stats = library.statistics()
+        total_books = stats["total_books"]
+        total_loans = stats["total_loans"]
+
         selection = _ask_choice(f"""
 --------------------------------------------------------------------
 Bibliotekos valdymas
 Prisijungęs bibliotekininkas: {librarian.user_name}
-Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis: {len(library.loans)}
-
-
+Bendras knygų kiekis (be kopijų): {total_books} | Paimtų knygų kiekis: {total_loans}
 
 Įveskite skaičių esantį prie vieno iš šių galimų veiksmų:
 
@@ -33,8 +36,9 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
 8) Pridėti startinį knygų paketą į biblioteką (100 skirtingų knygų)
 9) Atsijungti
 --------------------------------------------------------------------
-""", {"1","2","3","4","5","6","7","8","9"})
+""", {"1", "2", "3", "4", "5", "6", "7", "8", "9"})
 
+        # 1) Add book
         if selection == "1":
             try:
                 name = _input_text("Pavadinimas: ").strip()
@@ -44,38 +48,39 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
                 copies = _ask_int("Kopijų skaičius: ", min_value=1)
 
                 book = library.add_book(name, author, year, genre, copies=copies)
-                save()
                 last_message = f"✅ Knyga pridėta / papildytos kopijos. ID: {book.id} | kopijos={book.copies}"
 
             except Exception as e:
-                last_message = f"Klaida: {e}"
+                last_message = f"☠️❌ Klaida: {e}"
 
+        # 2) Delete old books
         elif selection == "2":
             try:
                 older_than = _ask_int("Pašalinti knygas senesnes nei (metai): ", min_value=-1000, max_value=2101)
                 deleted = library.delete_old_books(older_than)
-                save()
                 last_message = f"✅ Pašalinta knygų: {deleted}"
             except Exception as e:
-                last_message = f"Klaida: {e}"
+                last_message = f"☠️❌ Klaida: {e}"
 
+        # 3) List all books
         elif selection == "3":
             books = library.list_all_books()
             _print_books_table(library, books)
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
-
+        # 4) Overdue loans
         elif selection == "4":
             overdue = library.list_overdue_loans()
             _print_overdue_table(library, overdue)
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
-
+        # 5) Search books
         elif selection == "5":
             text = _input_text("Įveskite pavadinimą arba autorių: ")
             results = library.search_books(text)
+
             if not results:
                 print("Nerasta.")
             else:
@@ -84,6 +89,7 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
+        # 6) Statistics
         elif selection == "6":
             stats = library.statistics()
 
@@ -98,23 +104,25 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
             print(f"Kiek dienų vidutiniškai vėluoja knygos: {stats['avg_overdue_days']:.0f}")
             print(f"Kokio žanro knygų yra daugiausiai bibliotekoje: {most_common}")
             print(f"Kokio žanro knygos yra daugiausiai imamos: {most_borrowed}")
+
             input("\nSpauskite Enter, kad grįžti į meniu...")
             last_message = ""
 
+        # 7) Change current date (testing)
         elif selection == "7":
             try:
                 print(f"Dabartinė data: {library.now().date()}")
-                year = _ask_int("Įveskite metus: ", min_value=2026, max_value=3000)
+                year = _ask_int("Įveskite metus: ", min_value=1900, max_value=3000)
                 month = _ask_int("Įveskite mėnesį (1-12): ", min_value=1, max_value=12)
                 day = _ask_int("Įveskite dieną (1-31): ", min_value=1, max_value=31)
 
                 library.set_current_date(year, month, day)
-                save()
                 last_message = f"✅ Nauja dabartinė data: {library.now().date()}"
 
             except Exception as e:
-                last_message = f"Neteisinga data: {e}"
+                last_message = f"☠️❌ Neteisinga data: {e}"
 
+        # 8) Add starter pack
         elif selection == "8":
             if library.starter_pack_added:
                 last_message = "☠️❌ Startinis knygų paketas jau buvo pridėtas."
@@ -127,12 +135,12 @@ Bendras knygų kiekis (be kopijų): {len(library.books)} | Paimtų knygų kiekis
                     added += 1
 
                 library.starter_pack_added = True
-                save()
-                last_message = f"✅ Pridėtas startinis knygų paketas. Pridėta knygų: {added}"
-
+                last_message = f"✅ Pridėtas startinis knygų paketas. Įrašų: {added}"
             except Exception as e:
                 last_message = f"☠️❌ Klaida: {e}"
 
+        # 9) Logout
         elif selection == "9":
             return
+
 

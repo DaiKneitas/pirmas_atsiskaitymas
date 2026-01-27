@@ -1,6 +1,7 @@
 from utils.helper_functions import _ask_choice, _input_text, _clear_screen
 
-def login_meniu(library, save):
+
+def login_meniu(library):
     last_message = ""
 
     while True:
@@ -26,8 +27,9 @@ Registracija naujiems programos vartotojams
 --------------------------------------------
 9) Išeiti
 --------------------------------------------
-""", {"1","2","3","4","9"})
+""", {"1", "2", "3", "4", "9"})
 
+        # 1) Librarian login
         if selection == "1":
             print("--- Bibliotekininko prisijungimas ---")
             user_name = _input_text("Įveskite savo prisijungimo vardą: ")
@@ -39,8 +41,7 @@ Registracija naujiems programos vartotojams
 
             last_message = "☠️❌ Neteisingai suvesti bibliotekininko prisijungimo duomenys!"
 
-
-
+        # 2) Reader login
         elif selection == "2":
             print("--- Skaitytojo prisijungimas ---")
             card_id = _input_text("Įveskite savo kortelės numerį: ")
@@ -52,8 +53,7 @@ Registracija naujiems programos vartotojams
 
             last_message = "☠️❌ Neteisingai suvesti skaitytojo prisijungimo duomenys!"
 
-
-
+        # 3) Librarian registration
         elif selection == "3":
             print("--- Bibliotekininko registracija ---")
             user_name = _input_text("Įveskite norimą prisijungimo vardą: ")
@@ -61,13 +61,11 @@ Registracija naujiems programos vartotojams
 
             try:
                 library.add_librarian(user_name, password)
-                save()
                 last_message = "✅ Bibliotekininkas sukurtas. Dabar prisijunkite."
             except Exception as e:
                 last_message = f"☠️❌ Klaida: {e}"
 
-
-
+        # 4) Reader registration
         elif selection == "4":
             print("--- Skaitytojo registracija ---")
             name = _input_text("Įveskite savo vardą: ")
@@ -76,7 +74,6 @@ Registracija naujiems programos vartotojams
 
             try:
                 reader = library.register_reader(name, last_name, password)
-                save()
 
                 print(f"\n✅ Skaitytojas sukurtas! Jūsų kortelės numeris: {reader.reader_card_id}")
                 input("Spauskite Enter, kad grįžti į prisijungimo meniu...")
@@ -87,8 +84,7 @@ Registracija naujiems programos vartotojams
             except Exception as e:
                 last_message = f"☠️❌ Klaida: {e}"
 
-
-
+        # 9) Exit
         elif selection == "9":
             return None
 

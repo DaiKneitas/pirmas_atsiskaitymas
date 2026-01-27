@@ -57,7 +57,7 @@ def _print_overdue_table(library, overdue_loans):
     print("-" * len(header))
 
     for loan in overdue_loans:
-        book = library.books.get(loan.book_id)
+        book = library.get_book_by_id(loan.book_id)
         if not book:
             continue
 
