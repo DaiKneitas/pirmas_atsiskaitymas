@@ -1,4 +1,5 @@
-import sqlite3
+# import sqlite3
+import pymysql
 import uuid
 import datetime as dt
 import random
@@ -7,12 +8,11 @@ from models.book import Book
 from models.reader import Reader
 from models.librarian import Librarian
 from models.loan import Loan
-from config import MAX_BOOKS_PER_READER, DEFAULT_LOAN_DAYS
+from config import MAX_BOOKS_PER_READER, DEFAULT_LOAN_DAYS, DB_HOST, DB_NAME, DB_USER, DB_PASSWORD
 
 
 class Library:
-    def __init__(self, db_path):
-        self.db_path = db_path
+    def __init__(self):
         self.starter_pack_added = False
         self.current_date = dt.datetime.now()
 
@@ -22,16 +22,30 @@ class Library:
 
 
     # ---------- DB helpers ----------
+
     def _get_conn(self):
-        conn = sqlite3.connect(self.db_path)
-        conn.execute("PRAGMA foreign_keys = ON")
-        return conn
+        return pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            charset="utf8mb4",
+            autocommit=True,
+            )
 
-    def _dt_to_text(self, date):
-        return date.isoformat(timespec="seconds")
+    def _dt_to_text(self, value):
+    # MySQL accepts datetime directly, so just return it
+        return value
 
-    def _text_to_dt(self, seconds):
-        return dt.datetime.fromisoformat(seconds)
+
+    def _text_to_dt(self, value):
+        # MySQL often returns datetime already
+        if value is None:
+            return None
+        if isinstance(value, dt.datetime):
+            return value
+        # fallback if something returns text
+        return dt.datetime.fromisoformat(value)
     
 
     # ----- metodai datos pakeitimui -----
@@ -55,11 +69,10 @@ class Library:
             with self._get_conn() as conn:
                 cur = conn.cursor()
                 cur.execute(
-                    "INSERT INTO librarians (user_name, password) VALUES (?, ?)",
+                    "INSERT INTO librarians (user_name, password) VALUES (%s, %s)",
                     (user_name, password),
                 )
-        except sqlite3.IntegrityError:
-            # user_name PRIMARY KEY already exists
+        except pymysql.IntegrityError:
             raise ValueError("☠️❌ Toks bibliotekininkas jau egzistuoja.")
 
         return Librarian(user_name, password)
@@ -72,7 +85,7 @@ class Library:
         with self._get_conn() as conn:
             cur = conn.cursor()
             cur.execute(
-                "SELECT user_name, password FROM librarians WHERE user_name = ?",
+                "SELECT user_name, password FROM librarians WHERE user_name = %s",
                 (user_name,),
             )
             row = cur.fetchone()
@@ -95,7 +108,7 @@ class Library:
 
             with self._get_conn() as conn:
                 cur = conn.cursor()
-                cur.execute("SELECT 1 FROM readers WHERE card_id = ?", (card_id,))
+                cur.execute("SELECT 1 FROM readers WHERE card_id = %s", (card_id,))
                 if not cur.fetchone():
                     return card_id
     
@@ -113,7 +126,7 @@ class Library:
         with self._get_conn() as conn:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO readers (card_id, name, last_name, password) VALUES (?, ?, ?, ?)",
+                "INSERT INTO readers (card_id, name, last_name, password) VALUES (%s, %s, %s, %s)",
                 (card_id, name, last_name, password),
             )
 
@@ -129,7 +142,7 @@ class Library:
         with self._get_conn() as conn:
             cur = conn.cursor()
             cur.execute(
-                "SELECT card_id, name, last_name, password FROM readers WHERE card_id = ?",
+                "SELECT card_id, name, last_name, password FROM readers WHERE card_id = %s",
                 (card_id,),
             )
             row = cur.fetchone()
@@ -158,7 +171,7 @@ class Library:
         with self._get_conn() as conn:
             cur = conn.cursor()
             cur.execute(
-                "SELECT id, name, author, year, genre, copies FROM books WHERE id = ?",
+                "SELECT id, name, author, year, genre, copies FROM books WHERE id = %s",
                 (book_id_text,),
             )
             row = cur.fetchone()
@@ -181,7 +194,7 @@ class Library:
                 """
                 SELECT book_id
                 FROM loans
-                WHERE reader_card_id = ? AND returned_at IS NULL
+                WHERE reader_card_id = %s AND returned_at IS NULL
                 """,
                 (reader_card_id,),
             )
@@ -217,7 +230,7 @@ class Library:
                 """
                 SELECT id, name, author, year, genre, copies
                 FROM books
-                WHERE lower(name)=? AND lower(author)=? AND year=?
+                WHERE lower(name)=%s AND lower(author)=%s AND year=%s
                 """,
                 (name_check, author_check, year),
             )
@@ -226,7 +239,7 @@ class Library:
             if row:
                 book_id_text, db_name, db_author, db_year, db_genre, db_copies = row
                 new_copies = db_copies + copies
-                cur.execute("UPDATE books SET copies = ? WHERE id = ?", (new_copies, book_id_text))
+                cur.execute("UPDATE books SET copies = %s WHERE id = %s", (new_copies, book_id_text))
 
                 b = Book(db_name, db_author, db_year, db_genre, copies=new_copies)
                 b.id = uuid.UUID(book_id_text)
@@ -237,7 +250,7 @@ class Library:
             cur.execute(
                 """
                 INSERT INTO books (id, name, author, year, genre, copies)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 """,
                 (book_id, name, author, year, genre, copies),
             )
@@ -273,7 +286,7 @@ class Library:
                 """
                 SELECT id, name, author, year, genre, copies
                 FROM books
-                WHERE lower(name) LIKE ? OR lower(author) LIKE ?
+                WHERE lower(name) LIKE %s OR lower(author) LIKE %s
                 ORDER BY name
                 """,
                 (like, like),
@@ -298,7 +311,7 @@ class Library:
                 """
                 SELECT COUNT(*)
                 FROM loans
-                WHERE book_id = ? AND returned_at IS NULL
+                WHERE book_id = %s AND returned_at IS NULL
                 """,
                 (book_id_text,),
             )
@@ -310,7 +323,7 @@ class Library:
 
         with self._get_conn() as conn:
             cur = conn.cursor()
-            cur.execute("SELECT copies FROM books WHERE id = ?", (book_id_text,))
+            cur.execute("SELECT copies FROM books WHERE id = %s", (book_id_text,))
             row = cur.fetchone()
 
         if not row:
@@ -344,12 +357,12 @@ class Library:
                     continue
 
                 cur.execute(
-                    "SELECT COUNT(*) FROM loans WHERE book_id = ? AND returned_at IS NULL",
+                    "SELECT COUNT(*) FROM loans WHERE book_id = %s AND returned_at IS NULL",
                     (book_id_text,),
                 )
                 active = cur.fetchone()[0]
                 if active == 0:
-                    cur.execute("DELETE FROM books WHERE id = ?", (book_id_text,))
+                    cur.execute("DELETE FROM books WHERE id = %s", (book_id_text,))
                     deleted += 1
 
         return deleted
@@ -369,9 +382,9 @@ class Library:
                 """
                 SELECT 1
                 FROM loans
-                WHERE reader_card_id = ?
+                WHERE reader_card_id = %s
                   AND returned_at IS NULL
-                  AND return_date < ?
+                  AND return_date < %s
                 LIMIT 1
                 """,
                 (reader_card_id, now_text),
@@ -391,7 +404,7 @@ class Library:
                 """
                 SELECT book_id, reader_card_id, borrow_date, return_date
                 FROM loans
-                WHERE returned_at IS NULL AND return_date < ?
+                WHERE returned_at IS NULL AND return_date < %s
                 ORDER BY return_date
                 """,
                 (now_text,),
@@ -422,9 +435,9 @@ class Library:
                 """
                 SELECT COUNT(*)
                 FROM loans
-                WHERE reader_card_id = ?
+                WHERE reader_card_id = %s
                   AND returned_at IS NULL
-                  AND return_date < ?
+                  AND return_date < %s
                 """,
                 (reader_card_id, now_text),
             )
@@ -439,7 +452,7 @@ class Library:
                 """
                 SELECT borrow_date, return_date
                 FROM loans
-                WHERE reader_card_id = ? AND book_id = ? AND returned_at IS NULL
+                WHERE reader_card_id = %s AND book_id = %s AND returned_at IS NULL
                 """,
                 (reader_card_id, str(book_id)),
             )
@@ -457,12 +470,12 @@ class Library:
  
         with self._get_conn() as conn:
             cur = conn.cursor()
-            cur.execute("SELECT 1 FROM readers WHERE card_id = ?", (reader_card_id,))
+            cur.execute("SELECT 1 FROM readers WHERE card_id = %s", (reader_card_id,))
             if not cur.fetchone():
                 raise ValueError("☠️❌ Nerastas skaitytojas su tokiu kortelės numeriu.")
 
 
-            cur.execute("SELECT copies, genre FROM books WHERE id = ?", (str(book_id),))
+            cur.execute("SELECT copies, genre FROM books WHERE id = %s", (str(book_id),))
             book_row = cur.fetchone()
             if not book_row:
                 raise ValueError("☠️❌ Nerasta tokia knyga.")
@@ -475,7 +488,7 @@ class Library:
                 """
                 SELECT COUNT(*)
                 FROM loans
-                WHERE reader_card_id = ? AND returned_at IS NULL
+                WHERE reader_card_id = %s AND returned_at IS NULL
                 """,
                 (reader_card_id,),
             )
@@ -497,7 +510,7 @@ class Library:
             cur.execute(
                 """
                 INSERT INTO loans (book_id, reader_card_id, borrow_date, return_date, returned_at)
-                VALUES (?, ?, ?, ?, NULL)
+                VALUES (%s, %s, %s, %s, NULL)
                 """,
                 (str(book_id), reader_card_id, self._dt_to_text(borrow_date), self._dt_to_text(return_date)),
             )
@@ -517,8 +530,8 @@ class Library:
             cur.execute(
                 """
                 UPDATE loans
-                SET returned_at = ?
-                WHERE reader_card_id = ? AND book_id = ? AND returned_at IS NULL
+                SET returned_at = %s
+                WHERE reader_card_id = %s AND book_id = %s AND returned_at IS NULL
                 """,
                 (returned_at, reader_card_id, str(book_id)),
             )
@@ -540,7 +553,7 @@ class Library:
                 """
                 SELECT return_date
                 FROM loans
-                WHERE reader_card_id = ? AND returned_at IS NULL AND return_date < ?
+                WHERE reader_card_id = %s AND returned_at IS NULL AND return_date < %s
                 """,
                 (reader_card_id, now_text),
             )
@@ -574,7 +587,7 @@ class Library:
 
             now_text = self._dt_to_text(now)
             cur.execute(
-                "SELECT COUNT(*) FROM loans WHERE returned_at IS NULL AND return_date < ?",
+                "SELECT COUNT(*) FROM loans WHERE returned_at IS NULL AND return_date < %s",
                 (now_text,),
             )
             overdue_count = cur.fetchone()[0]

@@ -3,15 +3,11 @@ from services.db_tables import library_tables
 from ui.login_meniu import login_meniu
 from ui.librarian_meniu import librarian_meniu
 from ui.reader_meniu import reader_meniu
-from config import DB_FILE
-import os
 
 
 def main():
-    os.makedirs("database_files", exist_ok=True)
-    library_tables(DB_FILE)
-
-    library = Library(DB_FILE)
+    library_tables()
+    library = Library()
 
     while True:
         session = login_meniu(library)
