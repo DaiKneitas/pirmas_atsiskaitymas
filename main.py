@@ -1,12 +1,11 @@
 from models.library import Library
-from services.db_tables import library_tables
 from ui.login_meniu import login_meniu
 from ui.librarian_meniu import librarian_meniu
 from ui.reader_meniu import reader_meniu
 
 
 def main():
-    library_tables()
+
     library = Library()
 
     while True:
